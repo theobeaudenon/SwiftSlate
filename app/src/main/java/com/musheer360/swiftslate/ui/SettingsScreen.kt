@@ -15,6 +15,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.musheer360.swiftslate.R
@@ -29,7 +30,7 @@ import com.musheer360.swiftslate.ui.components.SlateTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: androidx.navigation.NavController? = null) {
+fun SettingsScreen(onNavigateToBlocklist: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val prefs = remember { context.getSharedPreferences("settings", Context.MODE_PRIVATE) }
@@ -325,15 +326,9 @@ fun SettingsScreen(navController: androidx.navigation.NavController? = null) {
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+        SectionHeader(stringResource(R.string.settings_builtin_lang_title))
 
         SlateCard {
-            Text(
-                text = stringResource(R.string.settings_builtin_lang_title),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
 
             ExposedDropdownMenuBox(
                 expanded = builtinLangExpanded,
@@ -369,15 +364,9 @@ fun SettingsScreen(navController: androidx.navigation.NavController? = null) {
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+        SectionHeader(stringResource(R.string.settings_spinner_style_title))
 
         SlateCard {
-            Text(
-                text = stringResource(R.string.settings_spinner_style_title),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
 
             ExposedDropdownMenuBox(
                 expanded = spinnerStyleExpanded,
@@ -513,7 +502,7 @@ fun SettingsScreen(navController: androidx.navigation.NavController? = null) {
             Button(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    navController?.navigate("blocklist")
+                    onNavigateToBlocklist()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

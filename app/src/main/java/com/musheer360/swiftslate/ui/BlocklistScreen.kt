@@ -1,7 +1,6 @@
 package com.musheer360.swiftslate.ui
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +25,7 @@ import com.musheer360.swiftslate.R
 import com.musheer360.swiftslate.manager.BlocklistManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.graphics.createBitmap
 
 data class AppItem(
     val packageName: String,
@@ -45,14 +45,14 @@ fun BlocklistScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
+        val loadedApps = withContext(Dispatchers.IO) {
             val pm = context.packageManager
             val intent = Intent(Intent.ACTION_MAIN, null).apply {
                 addCategory(Intent.CATEGORY_LAUNCHER)
             }
             val resolveInfoList = pm.queryIntentActivities(intent, 0)
 
-            val loadedApps = resolveInfoList.mapNotNull { resolveInfo ->
+            resolveInfoList.mapNotNull { resolveInfo ->
                 val packageName = resolveInfo.activityInfo.packageName
                 if (packageName == context.packageName) return@mapNotNull null
 
@@ -60,14 +60,14 @@ fun BlocklistScreen(navController: NavController) {
                     val appName = resolveInfo.loadLabel(pm).toString()
                     val icon = resolveInfo.loadIcon(pm)
                     AppItem(packageName, appName, icon)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
             }.sortedBy { it.appName.lowercase() }
-
-            apps = loadedApps
-            isLoading = false
         }
+
+        apps = loadedApps
+        isLoading = false
     }
 
     Scaffold(
@@ -78,7 +78,7 @@ fun BlocklistScreen(navController: NavController) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.nav_app_bar_navigate_up_description)
                         )
                     }
                 },
@@ -111,7 +111,7 @@ fun BlocklistScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    placeholder = { Text("Search apps...") },
+                    placeholder = { Text(stringResource(R.string.search_apps)) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     colors = OutlinedTextFieldDefaults.colors(
@@ -143,12 +143,8 @@ fun BlocklistScreen(navController: NavController) {
                                 val bitmap = remember(app.packageName) {
                                     try {
                                         app.icon.toBitmap().asImageBitmap()
-                                    } catch (e: Exception) {
-                                        val fallback = android.graphics.Bitmap.createBitmap(
-                                            1,
-                                            1,
-                                            android.graphics.Bitmap.Config.ARGB_8888
-                                        )
+                                    } catch (_: Exception) {
+                                        val fallback = createBitmap(1, 1)
                                         fallback.asImageBitmap()
                                     }
                                 }

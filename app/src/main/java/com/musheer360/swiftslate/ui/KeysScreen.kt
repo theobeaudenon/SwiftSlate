@@ -148,44 +148,46 @@ fun KeysScreen() {
 
         if (keys.isNotEmpty()) {
             SectionHeader(stringResource(R.string.dashboard_api_keys_title))
-            SlateCard {
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    itemsIndexed(keys, key = { _, key -> key }) { index, key ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp)
-                                .semantics(mergeDescendants = true) {},
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "••••••••" + key.takeLast(6),
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    keyManager.removeKey(key)
-                                    keys = keyManager.getKeys()
-                                },
-                                modifier = Modifier.size(36.dp)
+            SlateCard(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(keys, key = { _, key -> key }) { index, key ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .semantics(mergeDescendants = true) {},
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.keys_delete_key),
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(20.dp)
+                                Text(
+                                    text = "••••••••" + key.takeLast(6),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                IconButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        keyManager.removeKey(key)
+                                        keys = keyManager.getKeys()
+                                    },
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.keys_delete_key),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
-                        }
-                        if (index < keys.lastIndex) {
-                            SlateDivider()
+                            if (index < keys.lastIndex) {
+                                SlateDivider()
+                            }
                         }
                     }
                 }

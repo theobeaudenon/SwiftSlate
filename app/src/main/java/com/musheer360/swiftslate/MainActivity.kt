@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -101,7 +100,9 @@ fun SwiftSlateMainScreen() {
             composable(Screen.Dashboard.route) { DashboardScreen() }
             composable(Screen.Keys.route) { KeysScreen() }
             composable(Screen.Commands.route) { CommandsScreen() }
-            composable(Screen.Settings.route) { SettingsScreen(navController) }
+            composable(Screen.Settings.route) { 
+                SettingsScreen(onNavigateToBlocklist = { navController.navigate("blocklist") }) 
+            }
             composable("blocklist") { BlocklistScreen(navController) }
         }
     }

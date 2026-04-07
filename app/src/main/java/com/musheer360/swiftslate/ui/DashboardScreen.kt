@@ -23,11 +23,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.background
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -92,7 +88,6 @@ fun DashboardScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -240,7 +235,6 @@ fun DashboardScreen() {
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
 @Composable
 fun TokensBarChart(data: List<Pair<String, Long>>) {
     val maxTokens = data.maxOfOrNull { it.second }?.coerceAtLeast(10L) ?: 10L
@@ -253,7 +247,12 @@ fun TokensBarChart(data: List<Pair<String, Long>>) {
         verticalAlignment = Alignment.Bottom
     ) {
         data.forEach { (dateStr, tokens) ->
-            val heightFraction = (tokens.toFloat() / maxTokens.toFloat()).coerceIn(0.02f, 1f)
+            val heightFraction = if (tokens == 0L) {
+                0f
+            } else {
+                (tokens.toFloat() / maxTokens.toFloat()).coerceIn(0.02f, 1f)
+            }
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
@@ -295,4 +294,3 @@ fun TokensBarChart(data: List<Pair<String, Long>>) {
         }
     }
 }
-

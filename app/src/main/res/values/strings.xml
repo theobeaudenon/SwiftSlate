@@ -105,4 +105,7 @@
     <string name="settings_blocklist_desc">Select apps where SwiftSlate should not run.</string>
     <string name="settings_blocklist_button">Manage Blocklist</string>
     <string name="blocklist_title">App Blocklist</string>
+    <string name="nav_app_bar_navigate_up_description">Back</string>
+    <string name="search_apps">Search apps…</string>
+    <string name="duplicate_command">Duplicate command</string>
 </resources>

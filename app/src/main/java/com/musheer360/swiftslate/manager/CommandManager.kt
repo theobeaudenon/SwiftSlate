@@ -15,6 +15,12 @@ class CommandManager(context: Context) {
     @Volatile
     private var cachedCommands: List<Command>? = null
 
+    // Added cache variables for built-in definitions to prevent repetitive disk I/O
+    @Volatile
+    private var cachedBuiltInDefinitions: List<Pair<String, String>>? = null
+    @Volatile
+    private var cachedBuiltInLang: String? = null
+
     companion object {
         const val DEFAULT_PREFIX = "?"
         const val PREF_TRIGGER_PREFIX = "trigger_prefix"
@@ -22,6 +28,12 @@ class CommandManager(context: Context) {
 
     private fun getBuiltInDefinitions(): List<Pair<String, String>> {
         val langSetting = settingsPrefs.getString("builtin_lang", "auto") ?: "auto"
+
+        // Return cached definitions if the language setting hasn't changed
+        if (cachedBuiltInDefinitions != null && cachedBuiltInLang == langSetting) {
+            return cachedBuiltInDefinitions!!
+        }
+
         val langToTry = if (langSetting == "auto") {
             java.util.Locale.getDefault().let { "${it.language}_${it.country}".lowercase() }
         } else {
@@ -58,6 +70,11 @@ class CommandManager(context: Context) {
                 e.printStackTrace()
             }
         }
+
+        // Update the cache before returning
+        cachedBuiltInLang = langSetting
+        cachedBuiltInDefinitions = list
+
         return list
     }
 
@@ -77,8 +94,10 @@ class CommandManager(context: Context) {
         if (newPrefix.length != 1 || newPrefix[0].isLetterOrDigit() || newPrefix[0].isWhitespace()) return false
         val oldPrefix = getTriggerPrefix()
         if (oldPrefix == newPrefix) return true
+
         // Write prefix FIRST (synchronous) so built-ins work immediately if process dies mid-migration
         settingsPrefs.edit().putString(PREF_TRIGGER_PREFIX, newPrefix).commit()
+
         // Migrate custom command triggers
         val customStr = prefs.getString("custom_commands", "[]") ?: "[]"
         val arr = JSONArray(customStr)
@@ -180,7 +199,7 @@ class CommandManager(context: Context) {
 
     fun findCommand(text: String): Command? {
         val commands = getCommands()
-        for (cmd in commands) {  // Already sorted by trigger length in getCommands()
+        for (cmd in commands) {
             if (text.endsWith(cmd.trigger)) {
                 return cmd
             }

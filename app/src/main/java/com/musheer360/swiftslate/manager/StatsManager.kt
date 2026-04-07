@@ -14,6 +14,7 @@ class StatsManager(context: Context) {
         private const val PREF_CURRENT_MONTH = "current_month"
         private const val PREF_REQUESTS_THIS_MONTH = "requests_this_month"
         private const val CMD_PREFIX = "cmd_"
+        private const val DAILY_PREFIX = "tokens_"
     }
 
     private fun getCurrentMonthString(): String {
@@ -27,13 +28,38 @@ class StatsManager(context: Context) {
     fun addTokens(count: Int) {
         val current = prefs.getLong(PREF_TOTAL_TOKENS, 0L)
         val today = getCurrentDayString()
-        val dailyPref = "tokens_$today"
+        val dailyPref = "$DAILY_PREFIX$today"
         val currentDaily = prefs.getLong(dailyPref, 0L)
 
         prefs.edit()
             .putLong(PREF_TOTAL_TOKENS, current + count)
             .putLong(dailyPref, currentDaily + count)
             .apply()
+
+        cleanupOldStats()
+    }
+
+    private fun cleanupOldStats() {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.add(java.util.Calendar.DAY_OF_YEAR, -30)
+        val cutoff = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
+
+        val editor = prefs.edit()
+        var changed = false
+
+        prefs.all.forEach { (key, _) ->
+            if (key.startsWith(DAILY_PREFIX)) {
+                val datePart = key.substringAfter(DAILY_PREFIX)
+                if (datePart < cutoff) {
+                    editor.remove(key)
+                    changed = true
+                }
+            }
+        }
+
+        if (changed) {
+            editor.apply()
+        }
     }
 
     fun getUsedTokens(): Long {
@@ -96,7 +122,7 @@ class StatsManager(context: Context) {
 
         for (i in 0 until 7) {
             val dateStr = format.format(calendar.time)
-            val tokens = prefs.getLong("tokens_$dateStr", 0L)
+            val tokens = prefs.getLong("$DAILY_PREFIX$dateStr", 0L)
 
             // Format axis label e.g., "15/04"
             val displayFormat = SimpleDateFormat("dd/MM", Locale.US)
